@@ -11,15 +11,21 @@ env:
 
 jobs:
   push:
-    name: Test GitHub push on MacOS
-    runs-on: macos-latest
+    name: Test
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
-      - run: |
-          git commit -m 'Test commit' --allow-empty
+      - name: Make a test commit
+        env:
+          RUNNER_OS: ${{ runner.os }}
+        run: |
+          git commit -m "Test commit on $RUNNER_OS" --allow-empty
       - name: Push to GitHub
         uses: ad-m/github-push-action@master
         with:
-          branch: push-target
+          branch: push-targets/${{ runner.os }}
           force: true
           github_token: ${{ secrets.GITHUB_TOKEN }}
