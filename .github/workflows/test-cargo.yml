@@ -1,0 +1,44 @@
+name: Test cargo behavior
+
+on: push
+
+jobs:
+  dump-vanilla-cache:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: What has it got in its pocketses?
+        shell: bash
+        run: |
+          git -C ~/.cargo/registry/index/* log -1 refs/remotes/origin/master || :
+          ls ~/.cargo/registry/{cache,src}/* || :
+
+  generate-lockfile:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        expunge-index: [true, false]
+        include:
+          - os: macos-latest
+            expunge-index: false
+    runs-on: ${{ matrix.os }}
+    steps:
+
+      - uses: actions/checkout@v2
+
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - if: ${{ matrix.expunge-index }}
+        name: Clear cargo registry index
+        shell: bash
+        run: |
+          rm -rf ~/.cargo/registry/index
+
+      - run: cargo generate-lockfile -vv
