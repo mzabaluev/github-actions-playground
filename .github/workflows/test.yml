@@ -57,8 +57,11 @@ jobs:
         name: Fix up Cargo.lock hash
         shell: powershell
         run: |
-          $file = 'Cargo.lock'
-          ((Get-Content $file) -join "`n") + "`n" | Set-Content -NoNewline $file
+          Get-ChildItem . -Recurse -Filter Cargo.lock |
+          Foreach-Object {
+            ((Get-Content $_.FullName) -join "`n") + "`n" |
+            Set-Content -NoNewline $_.FullName
+          }
 
       - id: cargo-registry
         name: Cache cargo registry
