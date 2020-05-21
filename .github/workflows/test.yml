@@ -34,3 +34,8 @@ jobs:
           restore-keys: |
             crates-io-index-
       - run: cargo fetch -vv --locked
+      - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
+        name: Prune unpacked sources of dependency crates from cache
+        shell: bash
+        run: |
+          rm -rf ~/.cargo/registry/src
