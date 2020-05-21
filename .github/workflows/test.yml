@@ -33,18 +33,7 @@ jobs:
           restore-keys: |
             cargo-index-
 
-      - id: cargo-git
-        name: Cache cargo git dependencies
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git/db
-          key: cargo-git-${{ hashFiles('**/Cargo.lock') }}
-
-      - if: |
-          ${{
-            steps.cargo-registry.outputs.cache-hit != 'true' ||
-            steps.cargo-git.outputs.cache-hit != 'true'
-          }}
+      - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
         name: Fetch dependencies
         run: cargo fetch --locked
 
@@ -75,19 +64,13 @@ jobs:
             Set-Content -NoNewline $_.FullName
           }
 
-      - if: ${{ matrix.caching == 'cache' }}
+      - id: cargo-registry
+        if: ${{ matrix.caching == 'cache' }}
         name: Cache cargo registry
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
           key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-
-      - if: ${{ matrix.caching == 'cache' }}
-        name: Cache cargo git dependencies
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/git/db
-          key: cargo-git-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build and test
         uses: actions-rs/cargo@v1
