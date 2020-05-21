@@ -64,13 +64,17 @@ jobs:
             Set-Content -NoNewline $_.FullName
           }
 
-      - id: cargo-registry
-        if: ${{ matrix.caching == 'cache' }}
+      - if: ${{ matrix.caching == 'cache' }}
         name: Cache cargo registry
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
           key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - if: ${{ matrix.caching == 'no-cache' }}
+        shell: bash
+        run: |
+          rm -rf ~/.cargo/registry
 
       - name: Build and test
         uses: actions-rs/cargo@v1
