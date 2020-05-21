@@ -4,7 +4,8 @@ jobs:
   fetch:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [windows-latest]
+        #os: [ubuntu-latest, windows-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
@@ -30,9 +31,9 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry/index
-          key: crates-io-index-${{ steps.ls-crates-io-index.outputs.head }}
+          key: crates.io-index-${{ steps.ls-crates-io-index.outputs.head }}
           restore-keys: |
-            crates-io-index-
+            crates.io-index-
       - run: cargo fetch -vv --locked
       - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
         name: Prune unpacked sources of dependency crates from cache
