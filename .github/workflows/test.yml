@@ -1,20 +1,18 @@
 on: push
 
 jobs:
-  fetch:
-    strategy:
-      matrix:
-        os: [windows-latest]
-        #os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+  update-deps:
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - id: cargo-registry
         name: Cache cargo registry
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
           key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
       - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
         id: ls-crates-io-index
         name: Get head commit hash of crates.io registry index
@@ -31,12 +29,37 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry/index
-          key: crates.io-index-${{ steps.ls-crates-io-index.outputs.head }}
+          key: cargo-index-${{ steps.ls-crates-io-index.outputs.head }}
           restore-keys: |
-            crates.io-index-
-      - run: cargo fetch -vv --locked
+            cargo-index-
+
+      - name: Fetch dependencies
+        run: cargo fetch -vv --locked
+
       - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
         name: Prune unpacked sources of dependency crates from cache
         shell: bash
         run: |
           rm -rf ~/.cargo/registry/src
+
+  test:
+    needs: update-deps
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: cargo-registry
+        name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build and test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --locked
