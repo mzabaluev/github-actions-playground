@@ -33,8 +33,9 @@ jobs:
           restore-keys: |
             cargo-index-
 
-      - name: Fetch dependencies
-        run: cargo fetch -vv --locked
+      - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
+        name: Fetch dependencies
+        run: cargo fetch --locked
 
       - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
         name: Prune unpacked sources of dependency crates from cache
