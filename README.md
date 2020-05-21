@@ -1,3 +1,4 @@
-My small contribution to [fighting COVID-19][gh-comment].
+A playground for testing GitHub Actions.
 
-[gh-comment]: https://github.com/ad-m/github-push-action/issues/51#issuecomment-627383158
+Test workflows are created in branches.
+The master branch keeps the basic state for adding workflows to.
