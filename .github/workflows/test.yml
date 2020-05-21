@@ -51,6 +51,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # https://github.com/actions/runner/issues/498
+      - if: ${{ runner.os == 'Windows' }}
+        name: Fix up Cargo.lock hash
+        shell: powershell
+        run: |
+          $file = 'Cargo.lock'
+          ((Get-Content $file) -join "`n") + "`n" | Set-Content -NoNewline $file
+
       - id: cargo-registry
         name: Cache cargo registry
         uses: actions/cache@v1
