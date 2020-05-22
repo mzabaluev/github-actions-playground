@@ -6,15 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - id: cargo-registry
-        name: Cache cargo registry
-        uses: actions/cache@v1
-        with:
-          path: ~/.cargo/registry
-          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
-
-      - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
-        id: ls-crates-io-index
+      - id: ls-crates-io-index
         name: Get head commit hash of crates.io registry index
         continue-on-error: true
         shell: bash
@@ -24,14 +16,23 @@ jobs:
             cut -f 1
           )
           echo "::set-output name=head::$commit"
-      - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
-        name: Cache cargo registry index
+      - name: Cache cargo registry index
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry/index
           key: cargo-index-${{ steps.ls-crates-io-index.outputs.head }}
           restore-keys: |
             cargo-index-
+
+      - name: Generate Cargo.lock
+        run: cargo generate-lockfile
+
+      - id: cargo-registry
+        name: Cache cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
 
       - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
         name: Fetch dependencies
@@ -43,6 +44,12 @@ jobs:
         run: |
           rm -rf ~/.cargo/registry/src
 
+      - name: Upload Cargo.lock
+        uses: actions/upload-artifact@v2
+        with:
+          name: lockfile
+          path: Cargo.lock
+
   test:
     needs: update-deps
     strategy:
@@ -52,16 +59,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      # https://github.com/actions/runner/issues/498
-      - if: ${{ runner.os == 'Windows' }}
-        name: Fix up Cargo.lock hash
-        shell: powershell
-        run: |
-          Get-ChildItem . -Recurse -Filter Cargo.lock |
-          Foreach-Object {
-            ((Get-Content $_.FullName) -join "`n") + "`n" |
-            Set-Content -NoNewline $_.FullName
-          }
+      - name: Download Cargo.lock
+        uses: actions/download-artifact@v2
+        with:
+          name: lockfile
 
       - id: cargo-registry
         name: Cache cargo registry
@@ -70,7 +71,13 @@ jobs:
           path: ~/.cargo/registry
           key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build and test
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --all-targets --locked
+
+      - name: Test
         uses: actions-rs/cargo@v1
         with:
           command: test
