@@ -76,7 +76,15 @@ jobs:
         run: |
           rm -rf ~/.cargo/registry
 
-      - name: Build and test
+      - if: ${{ matrix.caching == 'cache' }}
+        name: Build and test (offline)
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --locked --offline
+
+      - if: ${{ matrix.caching == 'no-cache' }}
+        name: Build and test (fetching dependencies)
         uses: actions-rs/cargo@v1
         with:
           command: test
