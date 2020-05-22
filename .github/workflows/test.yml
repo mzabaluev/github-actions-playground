@@ -2,10 +2,7 @@ on: push
 
 jobs:
   update-deps:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
@@ -14,7 +11,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
 
       - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
         id: ls-crates-io-index
@@ -56,12 +53,23 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # https://github.com/actions/runner/issues/498
+      - if: ${{ runner.os == 'Windows' }}
+        name: Fix up Cargo.lock hash
+        shell: powershell
+        run: |
+          Get-ChildItem . -Recurse -Filter Cargo.lock |
+          Foreach-Object {
+            ((Get-Content $_.FullName) -join "`n") + "`n" |
+            Set-Content -NoNewline $_.FullName
+          }
+
       - if: ${{ matrix.caching == 'cache' }}
         name: Cache cargo registry
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
 
       - if: ${{ matrix.caching == 'no-cache' }}
         shell: bash
