@@ -1,4 +1,4 @@
-name: Test tar in the cargo registry index cache directory
+name: Test tar with the cargo registry index cache directory
 
 on: push
 
@@ -9,7 +9,7 @@ jobs:
 
       - run: |
           $cache_dir = "C:\Rust\.cargo\registry\index"
-          Get-Acl $cache_dir | Format-List
+          Get-Acl $cache_dir\github.com-1ecc6299db9ec823\.git\objects\pack\* | Format-List
           C:\windows\System32\tar.exe -cz -f ${{ runner.temp }}\index.tgz -C $cache_dir .
           C:\windows\System32\tar.exe -tzv -f ${{ runner.temp }}\index.tgz
           C:\windows\System32\tar.exe -xz -f ${{ runner.temp }}\index.tgz -C $cache_dir
