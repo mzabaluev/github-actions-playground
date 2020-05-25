@@ -1,4 +1,4 @@
-name: Dump ACLs of cargo repository index files
+name: Dump ACLs of cargo registry files
 
 on: push
 
@@ -8,5 +8,11 @@ jobs:
     steps:
 
       - run: |
-          Get-ChildItem -Recurse $env:UserProfile\.cargo\registry\index\github.com-1ecc6299db9ec823\.git\objects\pack |
-          Foreach-Object { Get-Acl $_ }
+          $cargo_home = "$env:UserProfile\.cargo"
+          $packdir = "$cargo_home\registry\index\github.com-1ecc6299db9ec823\.git\objects\pack"
+          Get-Acl $packdir | Format-List
+          Get-ChildItem $packdir |
+          Foreach-Object { Get-Acl $_ | Format-List }
+          $new_file = "$cargo_home\registry\foo"
+          New-Item $new_file -ItemType "file"
+          Get-Acl $new_file | Format-List
