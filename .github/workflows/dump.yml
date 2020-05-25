@@ -1,0 +1,12 @@
+name: Dump ACLs of cargo repository index files
+
+on: push
+
+jobs:
+  dump-acls:
+    runs-on: windows-latest
+    steps:
+
+      - run: |
+          Get-ChildItem -Recurse $env:UserProfile\.cargo\registry\index\github.com-1ecc6299db9ec823\.git\objects\pack |
+          Foreach-Object { Get-Acl $_ }
