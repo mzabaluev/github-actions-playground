@@ -9,8 +9,5 @@ jobs:
 
       - run: C:\windows\System32\tar.exe -cz -f ${{ runner.temp }}\index.tgz -C $env:UserProfile\.cargo\registry\index .
 
-      - name: Unpack into the working directory
-        run: C:\windows\System32\tar.exe -xz -f ${{ runner.temp }}\index.tgz
-
       - name: Unpack into the cargo index location
-        run: C:\windows\System32\tar.exe -xz -f ${{ runner.temp }}\index.tgz -C $env:UserProfile\.cargo\registry\index
+        run: C:\windows\System32\tar.exe -xzo -f ${{ runner.temp }}\index.tgz -C $env:UserProfile\.cargo\registry\index
