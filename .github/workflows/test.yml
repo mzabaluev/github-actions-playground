@@ -60,6 +60,12 @@ jobs:
         with:
           name: lockfile
 
+      # https://github.com/actions/virtual-environments/issues/895
+      # https://github.com/actions/virtual-environments/issues/936
+      - if: ${{ runner.os == 'Windows' }}
+        name: Clean up cargo registry files
+        run: rm -r -fo $env:UserProfile\.cargo\registry
+
       - name: Cache cargo registry index
         uses: actions/cache@v1
         with:
