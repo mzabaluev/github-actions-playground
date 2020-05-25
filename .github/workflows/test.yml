@@ -63,6 +63,12 @@ jobs:
             Set-Content -NoNewline $_.FullName
           }
 
+      # https://github.com/actions/virtual-environments/issues/895
+      # https://github.com/actions/virtual-environments/issues/936
+      - if: ${{ runner.os == 'Windows' }}
+        name: Clean up cargo registry files
+        run: rm -r -fo $env:UserProfile\.cargo\registry
+
       - id: cargo-registry
         name: Cache cargo registry
         uses: actions/cache@v1
