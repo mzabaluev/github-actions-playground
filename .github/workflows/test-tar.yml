@@ -1,50 +1,14 @@
-name: Test tar of the cargo repository index cache
+name: Test tar on Windows
 
 on: push
 
 jobs:
-  create-tar-windows:
+  test:
     runs-on: windows-latest
     steps:
 
-      - run: C:\windows\System32\tar.exe -cz -f ${{ runner.temp }}\index.tgz -C $env:UserProfile\.cargo\registry\index .
+      - run: echo "Hello" > file.txt
 
-      - uses: actions/upload-artifact@v2
-        with:
-          name: tarball-windows
-          path: ${{ runner.temp }}/index.tgz
+      - run: C:\windows\System32\tar.exe -czv -f ${{ runner.temp }}\file.tgz file.txt
 
-  repack-tar-linux:
-    needs: create-tar-windows
-    runs-on: ubuntu-latest
-    steps:
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: tarball-windows
-
-      - run: |
-          rm -rf ~/.cargo/registry/index/*
-          tar -xz -f index.tgz -C ~/.cargo/registry/index .
-          tar -cz -f ${{ runner.temp }}/index.tgz -C ~/.cargo/registry/index .
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: tarball-linux
-          path: ${{ runner.temp }}/index.tgz
-
-  unpack-tar:
-    strategy:
-      matrix:
-        from: [windows, linux]
-    needs: [create-tar-windows, repack-tar-linux]
-    runs-on: windows-latest
-    steps:
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: tarball-${{ matrix.from }}
-          path: ${{ runner.temp }}
-
-      - name: Unpack into the cargo index location
-        run: C:\windows\System32\tar.exe -xz -f ${{ runner.temp }}\index.tgz -C $env:UserProfile\.cargo\registry\index
+      - run: C:\windows\System32\tar.exe -xzv -f ${{ runner.temp }}\file.tgz
