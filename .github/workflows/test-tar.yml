@@ -8,8 +8,9 @@ jobs:
     steps:
 
       - run: |
-          $cache_dir = "C:\Rust\.cargo\registry\index"
-          Get-Acl $cache_dir\github.com-1ecc6299db9ec823\.git\objects\pack\* | Format-List
+          $cache_dir = "C:\Rust\.cargo\registry\index\github.com-1ecc6299db9ec823\.git"
+          Get-Acl $cache_dir\objects\pack\*, $cache_dir\refs\remotes\origin\master |
+            Select-Object -Property Path -ExpandProperty Access | Format-List
           C:\windows\System32\tar.exe -cz -f ${{ runner.temp }}\index.tgz -C $cache_dir .
           C:\windows\System32\tar.exe -tzv -f ${{ runner.temp }}\index.tgz
           C:\windows\System32\tar.exe -xz -f ${{ runner.temp }}\index.tgz -C $cache_dir
