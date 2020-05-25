@@ -16,3 +16,6 @@ jobs:
           $new_file = "$cargo_home\registry\foo"
           New-Item $new_file -ItemType "file"
           Get-Acl $new_file | Format-List
+          $new_dir = "$cargo_home\registry\bar"
+          New-Item $new_dir -ItemType "directory"
+          Get-Acl $new_dir | Format-List
