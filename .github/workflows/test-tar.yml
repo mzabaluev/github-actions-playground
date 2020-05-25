@@ -1,50 +1,9 @@
-name: Test tar of the cargo repository index cache
+name: Show tar --help output
 
 on: push
 
 jobs:
-  create-tar-windows:
+  show-tar-help:
     runs-on: windows-latest
     steps:
-
-      - uses: actions/checkout@v2
-
-      - run: cargo generate-lockfile
-
-      - run: C:\windows\System32\tar.exe -cz -f ${{ runner.temp }}\index.tgz -C $env:UserProfile\.cargo\registry\index .
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: tarball-windows
-          path: ${{ runner.temp }}/index.tgz
-
-  create-tar-linux:
-    runs-on: ubuntu-latest
-    steps:
-
-      - uses: actions/checkout@v2
-
-      - run: cargo generate-lockfile
-
-      - run: tar -cz -f ${{ runner.temp }}/index.tgz -C ~/.cargo/registry/index .
-
-      - uses: actions/upload-artifact@v2
-        with:
-          name: tarball-linux
-          path: ${{ runner.temp }}/index.tgz
-
-  unpack-tar:
-    strategy:
-      matrix:
-        from: [windows, linux]
-    needs: [create-tar-windows, create-tar-linux]
-    runs-on: windows-latest
-    steps:
-
-      - uses: actions/download-artifact@v2
-        with:
-          name: tarball-${{ matrix.from }}
-          path: ${{ runner.temp }}
-
-      - name: Unpack into the cargo index location
-        run: C:\windows\System32\tar.exe -xz -f ${{ runner.temp }}\index.tgz -C $env:UserProfile\.cargo\registry\index
+      - run: C:\windows\System32\tar.exe --help
