@@ -8,7 +8,6 @@ jobs:
     steps:
 
       - run: |
-          $cache_dir = "$env:UserProfile\.cargo\registry\index"
-          echo "Hello" > $cache_dir\file.txt
-          C:\windows\System32\tar.exe -czv -f ${{ runner.temp }}\file.tgz -C $cache_dir file.txt
+          $cache_dir = "$env:UserProfile\Links"
+          C:\windows\System32\tar.exe -czv -f ${{ runner.temp }}\file.tgz -C $cache_dir .
           C:\windows\System32\tar.exe -xzv -f ${{ runner.temp }}\file.tgz -C $cache_dir
