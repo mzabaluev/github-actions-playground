@@ -1,4 +1,4 @@
-name: Test tar on Windows
+name: Test tar in the cargo registry index cache directory
 
 on: push
 
@@ -7,8 +7,8 @@ jobs:
     runs-on: windows-latest
     steps:
 
-      - run: echo "Hello" > file.txt
-
-      - run: C:\windows\System32\tar.exe -czv -f ${{ runner.temp }}\file.tgz file.txt
-
-      - run: C:\windows\System32\tar.exe -xzv -f ${{ runner.temp }}\file.tgz
+      - run: |
+          $cache_dir = "$env:UserProfile\.cargo\registry\index"
+          echo "Hello" > $cache_dir\file.txt
+          C:\windows\System32\tar.exe -czv -f ${{ runner.temp }}\file.tgz -C $cache_dir file.txt
+          C:\windows\System32\tar.exe -xzv -f ${{ runner.temp }}\file.tgz -C $cache_dir
