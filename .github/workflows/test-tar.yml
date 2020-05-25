@@ -1,4 +1,4 @@
-name: Test tar of a git repository
+name: Test tar of the cargo repository index cache
 
 on: push
 
@@ -28,4 +28,8 @@ jobs:
           name: tarball
           path: ${{ runner.temp }}
 
-      - run: C:\windows\System32\tar.exe -xzv -f ${{ runner.temp }}\index.tgz
+      - name: Unpack into the working directory
+        run: C:\windows\System32\tar.exe -xz -f ${{ runner.temp }}\index.tgz
+
+      - name: Unpack into the cargo index location
+        run: C:\windows\System32\tar.exe -xz -f ${{ runner.temp }}\index.tgz -C $env:UserProfile\.cargo\registry\index
