@@ -12,8 +12,7 @@ jobs:
       - name: List read-only files
         run: Get-ChildItem .git -Recurse -Attributes ReadOnly
 
-      - name: Pack and unpack
-        run: |
-          $tar = "C:\Program Files\Git\usr\bin\tar.exe"
-          & $tar -cz --force-local -f ${{ runner.temp }}\repo.tgz .
-          & $tar -xzv --force-local -f ${{ runner.temp }}\repo.tgz
+      - uses: actions/cache@v2
+        with:
+          key: break-my-tar
+          path: .git
