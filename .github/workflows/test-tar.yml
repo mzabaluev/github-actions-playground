@@ -14,5 +14,6 @@ jobs:
 
       - name: Pack and unpack
         run: |
-          C:\windows\System32\tar.exe -cz -f ${{ runner.temp }}\repo.tgz .
-          C:\windows\System32\tar.exe -xzv -f ${{ runner.temp }}\repo.tgz
+          $tar = "C:\Program Files\Git\usr\bin\tar.exe"
+          & $tar -cz -f ${{ runner.temp }}\repo.tgz .
+          & $tar -xzv -f ${{ runner.temp }}\repo.tgz
