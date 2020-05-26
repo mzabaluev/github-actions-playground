@@ -34,7 +34,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry/cache
-          key: cargo-deps-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-deps-${{ hashFiles('Cargo.lock') }}
 
       - if: ${{ steps.cargo-deps.outputs.cache-hit != 'true' }}
         name: Fetch dependencies
@@ -76,7 +76,7 @@ jobs:
         uses: actions/cache@v1
         with:
           path: ~/.cargo/registry/cache
-          key: cargo-deps-${{ hashFiles('**/Cargo.lock') }}
+          key: cargo-deps-${{ hashFiles('Cargo.lock') }}
 
       - name: Build
         uses: actions-rs/cargo@v1
