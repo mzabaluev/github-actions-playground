@@ -68,7 +68,9 @@ jobs:
         name: Cache cargo registry
         uses: actions/cache@v2
         with:
-          path: ~/.cargo/registry
+          path: |
+            ~/.cargo/registry
+            !~/.cargo/registry/src
           key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build and test
