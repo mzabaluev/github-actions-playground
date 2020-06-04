@@ -64,8 +64,7 @@ jobs:
         name: Clean up cargo registry files
         run: rm -r -fo $env:UserProfile\.cargo\registry
 
-      - id: cargo-registry
-        name: Cache cargo registry
+      - name: Restore cargo registry
         uses: actions/cache@v2
         with:
           path: |
