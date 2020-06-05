@@ -1,6 +1,4 @@
-# Two-Stage Release Workflow
+# Simple Release Workflow
 
-The workflow in this branch tests creation of releases in two stages.
-First a draft is created to get the upload URL, to which the assets
-are uploaded. Then the release should be published by removing the draft
-attribute, or so the theory goes.
+The workflow in this branch tests creation of releases.
+Will I get a notification mail listing the README asset?
