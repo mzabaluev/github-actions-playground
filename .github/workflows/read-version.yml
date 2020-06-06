@@ -1,0 +1,23 @@
+on: push
+
+name: Get package version
+
+jobs:
+  read-version:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: version
+        name: Get version from Cargo.toml
+        shell: python
+        run: |
+          from __future__ import print_function
+          import json, sys
+          from subprocess import Popen, PIPE
+          p = Popen("cargo read-manifest", shell=True, stdout=PIPE)
+          d = json.load(p.stdout)
+          print('::set-output name=version::' + d['version'])
+
+      - name: Print version
+        run: echo ${{ steps.version.outputs.version }}
