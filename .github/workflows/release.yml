@@ -1,7 +1,4 @@
-on:
-  push:
-    tags:
-      - 'test-release-v*'
+on: push
 
 name: Two-stage release creation
 
@@ -17,14 +14,19 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Delete existing release
+        continue-on-error: true
+        run: |
+          hub release delete rolling-release
+          git push --delete origin refs/tags/rolling-release
+
       - name: Create release draft
         id: create_release
         run: |
-          release_ver=${GITHUB_REF#refs/tags/}
-          hub release create --draft \
-            -m "Release $release_ver (in progress)" \
-            $release_ver
-          upload_url=$(hub release show -f '%uA' $release_ver)
+          hub release create --prerelease --draft \
+            -m "Rolling release $GITHUB_SHA (in progress)" \
+            -t $GITHUB_SHA rolling-release
+          upload_url=$(hub release show -f '%uA' rolling-release)
           echo "::set-output name=upload_url::$upload_url"
 
   upload_asset:
@@ -34,7 +36,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Pretend we are building
+      - if: false
+        name: Pretend we are building
         run: sleep 1200
 
       - name: Upload asset
@@ -54,7 +57,6 @@ jobs:
 
       - name: Publish release
         run: |
-          release_ver=${GITHUB_REF#refs/tags/}
           hub release edit --draft=false \
-            -m "Release $release_ver" \
-            $release_ver
+            -m "Rolling release $GITHUB_SHA" \
+            rolling-release
