@@ -5,12 +5,15 @@ on:
 
 name: Two-stage release creation
 
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
 jobs:
-  release:
+  create_release:
     name: Create release
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v2
 
@@ -24,13 +27,27 @@ jobs:
           upload_url=$(hub release show -f '%uA' $release_ver)
           echo "::set-output name=upload_url::$upload_url"
 
+  upload_asset:
+    name: Upload asset
+    needs: create_release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
       - name: Upload asset
         uses: actions/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ needs.create_release.outputs.upload_url }}
           asset_path: ./README.md
           asset_name: README.md
           asset_content_type: text/markdown
+
+  publish_release:
+    name: Publish release
+    needs: upload_asset
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
 
       - name: Publish release
         run: |
@@ -38,4 +55,3 @@ jobs:
           hub release edit --draft=false \
             -m "Release $release_ver" \
             $release_ver
-
