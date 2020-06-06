@@ -36,9 +36,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - if: false
-        name: Pretend we are building
-        run: sleep 1200
+      - name: Pretend we are building
+        run: sleep 2000
 
       - name: Upload asset
         uses: actions/upload-release-asset@v1
