@@ -10,9 +10,8 @@ jobs:
 
       - id: version
         name: Get version from Cargo.toml
-        shell: python
+        shell: python3
         run: |
-          from __future__ import print_function
           import json, sys
           from subprocess import Popen, PIPE
           p = Popen("cargo read-manifest", shell=True, stdout=PIPE)
