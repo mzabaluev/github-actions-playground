@@ -4,29 +4,38 @@ name: Two-stage release creation
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  HUB_VERBOSE: 1
 
 jobs:
   create_release:
     name: Create release
     runs-on: ubuntu-latest
     outputs:
+      tag: ${{ steps.create_release.outputs.tag }}
       upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v2
 
-      - name: Delete existing release
+      - name: Delete existing nightly releases
         continue-on-error: true
         run: |
-          hub release delete rolling-release
-          git push --delete origin refs/tags/rolling-release
+          set +e
+          git ls-remote --tags --refs origin 'refs/tags/nightly*' |
+          cut -f 2 |
+          while read ref; do
+            hub release delete ${ref#refs/tags/}
+            git push --delete origin $ref
+          done
 
       - name: Create release draft
         id: create_release
         run: |
+          release_tag=nightly.$(date -u +%Y%m%d)
           hub release create --prerelease --draft \
             -m "Rolling release $GITHUB_SHA (in progress)" \
-            -t $GITHUB_SHA rolling-release
-          upload_url=$(hub release show -f '%uA' rolling-release)
+            -t $GITHUB_SHA $release_tag
+          upload_url=$(hub release show -f '%uA' $release_tag)
+          echo "::set-output name=tag::$release_tag"
           echo "::set-output name=upload_url::$upload_url"
 
   upload_asset:
@@ -35,10 +44,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-
-      - if: false
-        name: Pretend we are building
-        run: sleep 1200
 
       - name: Upload asset
         uses: actions/upload-release-asset@v1
@@ -50,7 +55,7 @@ jobs:
 
   publish_release:
     name: Publish release
-    needs: upload_asset
+    needs: [create_release, upload_asset]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -58,5 +63,5 @@ jobs:
       - name: Publish release
         run: |
           hub release edit --draft=false \
-            -m "Rolling release $GITHUB_SHA" \
-            rolling-release
+            -m "Nightly release $GITHUB_SHA" \
+            ${{ needs.create_release.outputs.tag }}
