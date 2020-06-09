@@ -74,6 +74,8 @@ jobs:
 
       - name: Build and test
         uses: actions-rs/cargo@v1
+        env:
+          CARGO_INCREMENTAL: 0
         with:
           command: test
           args: |
