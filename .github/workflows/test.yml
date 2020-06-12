@@ -20,19 +20,18 @@ jobs:
           echo "::set-output name=head::$commit"
 
       - name: Cache cargo registry index
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.cargo/registry/index
           key: cargo-index-${{ steps.ls-crates-io-index.outputs.head }}
-          restore-keys: |
-            cargo-index-
+          restore-keys: cargo-index-
 
       - name: Generate Cargo.lock
         run: cargo generate-lockfile
 
       - id: cargo-deps
         name: Cache dependency crates
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.cargo/registry/cache
           key: cargo-deps-${{ hashFiles('Cargo.lock') }}
@@ -64,13 +63,16 @@ jobs:
           name: lockfile
 
       - name: Restore cargo registry index
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.cargo/registry/index
           key: cargo-index-${{ needs.update-deps.outputs.crates-io-index-head }}
+          # May miss on Windows:
+          # https://github.com/actions/cache/issues/330#issuecomment-637701649
+          restore-keys: cargo-index-
 
       - name: Restore dependency crates
-        uses: actions/cache@v1
+        uses: actions/cache@v2
         with:
           path: ~/.cargo/registry/cache
           key: cargo-deps-${{ hashFiles('Cargo.lock') }}
@@ -79,10 +81,10 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --all-targets --locked --offline
+          args: --all-targets --locked
 
       - name: Test
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --locked --offline
+          args: --locked
