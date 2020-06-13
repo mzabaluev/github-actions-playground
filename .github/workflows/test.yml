@@ -11,8 +11,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ~/.cargo/registry
-            !~/.cargo/registry/src
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
             ~/.cargo/git/db
           key: cargo-deps-${{ hashFiles('**/Cargo.lock') }}
 
@@ -63,8 +63,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ~/.cargo/registry
-            !~/.cargo/registry/src
+            ~/.cargo/registry/index
+            ~/.cargo/registry/cache
             ~/.cargo/git/db
           key: cargo-deps-${{ hashFiles('**/Cargo.lock') }}
 
