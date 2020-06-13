@@ -6,4 +6,7 @@ edition = "2018"
 
 [dependencies]
 tokio = { version = "0.2", features = ["full"] }
-chunked-bytes = { git = "https://github.com/mzabaluev/chunked-bytes.git" }
+
+[dev-dependencies]
+assert_fs = "1.0"
+predicates = "1.0"
