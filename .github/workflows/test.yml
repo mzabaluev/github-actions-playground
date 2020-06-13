@@ -6,16 +6,17 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - id: cargo-registry
-        name: Cache cargo registry
+      - id: cargo-deps
+        name: Cache cargo dependencies
         uses: actions/cache@v2
         with:
           path: |
             ~/.cargo/registry
             !~/.cargo/registry/src
-          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            ~/.cargo/git/db
+          key: cargo-deps-${{ hashFiles('**/Cargo.lock') }}
 
-      - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
+      - if: ${{ steps.cargo-deps.outputs.cache-hit != 'true' }}
         id: ls-crates-io-index
         name: Get head commit hash of crates.io registry index
         continue-on-error: true
@@ -26,7 +27,7 @@ jobs:
             cut -f 1
           )
           echo "::set-output name=head::$commit"
-      - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
+      - if: ${{ steps.cargo-deps.outputs.cache-hit != 'true' }}
         name: Cache cargo registry index
         uses: actions/cache@v2
         with:
@@ -35,7 +36,7 @@ jobs:
           restore-keys: |
             cargo-index-
 
-      - if: ${{ steps.cargo-registry.outputs.cache-hit != 'true' }}
+      - if: ${{ steps.cargo-deps.outputs.cache-hit != 'true' }}
         name: Fetch dependencies
         run: cargo fetch --locked
 
@@ -58,13 +59,14 @@ jobs:
             Set-Content -NoNewline $_.FullName
           }
 
-      - name: Restore cargo registry
+      - name: Restore cargo dependencies
         uses: actions/cache@v2
         with:
           path: |
             ~/.cargo/registry
             !~/.cargo/registry/src
-          key: cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+            ~/.cargo/git/db
+          key: cargo-deps-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Build and test
         uses: actions-rs/cargo@v1
