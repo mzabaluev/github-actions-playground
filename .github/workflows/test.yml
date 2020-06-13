@@ -33,9 +33,7 @@ jobs:
         name: Cache dependency crates
         uses: actions/cache@v2
         with:
-          path: |
-            ~/.cargo/registry/cache
-            ~/.cargo/git/db
+          path: ~/.cargo/registry/cache
           key: cargo-deps-${{ hashFiles('Cargo.lock') }}
 
       - if: ${{ steps.cargo-deps.outputs.cache-hit != 'true' }}
@@ -76,9 +74,7 @@ jobs:
       - name: Restore dependency crates
         uses: actions/cache@v2
         with:
-          path: |
-            ~/.cargo/registry/cache
-            ~/.cargo/git/db
+          path: ~/.cargo/registry/cache
           key: cargo-deps-${{ hashFiles('Cargo.lock') }}
 
       - name: Build
