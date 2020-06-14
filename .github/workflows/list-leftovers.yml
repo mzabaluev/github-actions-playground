@@ -12,6 +12,13 @@ jobs:
       - name: Clean up cargo registry files
         run: rm -r -fo $env:UserProfile\.cargo\registry
 
+  cleanup-on-windows:
+    runs-on: windows-latest
+    continue-on-error: true
+    steps:
+      - name: Clean up cargo registry files on cold state
+        run: rm -r -fo $env:UserProfile\.cargo\registry
+
   list-on-linux:
     runs-on: ubuntu-latest
     continue-on-error: true
