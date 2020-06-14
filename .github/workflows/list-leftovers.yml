@@ -9,6 +9,8 @@ jobs:
     steps:
       - name: List Cargo registry cache files
         run: Get-ChildItem $env:UserProfile\.cargo\registry -Recurse
+      - name: Clean up cargo registry files
+        run: rm -r -fo $env:UserProfile\.cargo\registry
 
   list-on-linux:
     runs-on: ubuntu-latest
