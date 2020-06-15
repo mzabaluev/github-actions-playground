@@ -1,0 +1,15 @@
+on:
+  release
+
+name: Monitor release events
+
+jobs:
+  print_event:
+    name: Print context information
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo 'event_name: ${{ github.event_name }}'
+          echo 'event.action: ${{ github.event.action }}'
+          echo 'event.release.upload_url: ${{ github.event.release.upload_url }}'
+          echo "GITHUB_REF=$GITHUB_REF"
