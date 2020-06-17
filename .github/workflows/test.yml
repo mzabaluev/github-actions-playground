@@ -3,38 +3,35 @@ on: push
 jobs:
   update-deps:
     runs-on: ubuntu-latest
+    outputs:
+      crates-io-index-head: ${{ steps.ls-crates-io-index.outputs.head }}
     steps:
       - uses: actions/checkout@v2
 
-      - id: cargo-deps
-        name: Cache cargo dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cargo/registry/index
-            ~/.cargo/registry/cache
-            ~/.cargo/git/db
-          key: cargo-deps-${{ hashFiles('**/Cargo.lock') }}
-
-      - if: ${{ steps.cargo-deps.outputs.cache-hit != 'true' }}
-        id: ls-crates-io-index
+      - id: ls-crates-io-index
         name: Get head commit hash of crates.io registry index
-        continue-on-error: true
-        shell: bash
         run: |
           commit=$(
             git ls-remote --heads https://github.com/rust-lang/crates.io-index.git master |
             cut -f 1
           )
           echo "::set-output name=head::$commit"
-      - if: ${{ steps.cargo-deps.outputs.cache-hit != 'true' }}
-        name: Cache cargo registry index
+
+      - name: Cache cargo registry index
         uses: actions/cache@v2
         with:
           path: ~/.cargo/registry/index
           key: cargo-index-${{ steps.ls-crates-io-index.outputs.head }}
-          restore-keys: |
-            cargo-index-
+          restore-keys: cargo-index-
+
+      - id: cargo-deps
+        name: Cache cargo dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/registry/cache
+            ~/.cargo/git/db
+          key: cargo-deps-${{ hashFiles('**/Cargo.lock') }}
 
       - if: ${{ steps.cargo-deps.outputs.cache-hit != 'true' }}
         name: Fetch dependencies
@@ -48,6 +45,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
+
+      - name: Restore cargo registry index
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo/registry/index
+          key: cargo-index-${{ needs.update-deps.outputs.crates-io-index-head }}
+          # May miss on Windows:
+          # https://github.com/actions/cache/issues/330#issuecomment-637701649
+          restore-keys: cargo-index-
 
       # https://github.com/actions/runner/issues/498
       - if: ${{ runner.os == 'Windows' }}
@@ -63,7 +69,6 @@ jobs:
         uses: actions/cache@v2
         with:
           path: |
-            ~/.cargo/registry/index
             ~/.cargo/registry/cache
             ~/.cargo/git/db
           key: cargo-deps-${{ hashFiles('**/Cargo.lock') }}
