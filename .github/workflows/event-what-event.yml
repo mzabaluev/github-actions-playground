@@ -1,7 +1,11 @@
 on:
-  release
+  schedule:
+    - cron: '* * * * *'
+  push:
+    tags:
+      - 'test.event-info*'
 
-name: Monitor release events
+name: Event information
 
 jobs:
   print_event:
@@ -10,6 +14,6 @@ jobs:
     steps:
       - run: |
           echo 'event_name: ${{ github.event_name }}'
-          echo 'event.action: ${{ github.event.action }}'
-          echo 'event.release.upload_url: ${{ github.event.release.upload_url }}'
+          #echo 'event.action: ${{ github.event.action }}'
           echo "GITHUB_REF=$GITHUB_REF"
+          echo "GITHUB_SHA=$GITHUB_SHA"
