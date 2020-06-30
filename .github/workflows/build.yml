@@ -1,0 +1,58 @@
+on: push
+
+jobs:
+  update-registry:
+    runs-on: ubuntu-latest
+    outputs:
+      head: ${{ steps.ls-crates-io-index.outputs.head }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: ls-crates-io-index
+        name: Get head commit hash of crates.io registry index
+        run: |
+          commit=$(
+            git ls-remote --heads https://github.com/rust-lang/crates.io-index.git master |
+            cut -f 1
+          )
+          echo "::set-output name=head::$commit"
+      - name: Cache cargo registry index
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo/registry/index
+          key: cargo-index-${{ steps.ls-crates-io-index.outputs.head }}
+          restore-keys: cargo-index-
+
+      - run: cargo fetch
+
+  build:
+    needs: update-registry
+    strategy:
+      matrix:
+        build: [a, b]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Restore cargo registry
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo/registry/index
+          key: cargo-index-${{ needs.update-registry.outputs.head }}
+
+      - name: Build the dynamic library
+        uses: actions-rs/cargo@v1
+        env:
+          RUSTFLAGS: -C prefer-dynamic=yes
+          CARGO_INCREMENTAL: 0
+        with:
+          command: build
+          args: --verbose --release --lib
+
+      - name: Dump shared library information
+        run: readelf -a -D -W target/release/libhello_world.so > dylib-info.txt
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: build-${{ matrix.build }}
+          path: dylib-info.txt
