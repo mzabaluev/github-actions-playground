@@ -1,12 +1,11 @@
 [package]
-name = "github-actions-playground"
+name = "hello-world"
 version = "0.1.0"
 authors = ["Mikhail Zabaluev <mikhail.zabaluev@gmail.com>"]
 edition = "2018"
 
-[dependencies]
-tokio = { version = "0.2", features = ["full"] }
+[lib]
+crate-type = ["dylib"]
 
-[dev-dependencies]
-assert_fs = "1.0"
-predicates = "1.0"
+[[bin]]
+name = "hello-world"
