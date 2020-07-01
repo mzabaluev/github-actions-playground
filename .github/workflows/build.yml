@@ -2,7 +2,7 @@ on: push
 
 jobs:
   update-registry:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     outputs:
       head: ${{ steps.ls-crates-io-index.outputs.head }}
     steps:
@@ -30,7 +30,7 @@ jobs:
     strategy:
       matrix:
         build: [a, b]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
 
@@ -58,10 +58,11 @@ jobs:
             --verbose --release
             --lib --bin hello-world
 
+      - name: Print readelf version
+        run: readelf --version
+
       - name: Dump information from binaries
         run: |
-          set -x
-          ls -l target-${{ matrix.build }}/release target-${{ matrix.build }}/release/deps
           mkdir elf-info
           readelf -a -D -W target-${{ matrix.build }}/release/libhello_world.so > elf-info/dylib-${{ matrix.build }}.txt
           readelf -a -D -W target-${{ matrix.build }}/release/hello-world > elf-info/bin-${{ matrix.build }}.txt ||:
