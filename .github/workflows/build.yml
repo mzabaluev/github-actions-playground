@@ -60,9 +60,11 @@ jobs:
 
       - name: Dump information from binaries
         run: |
+          set -x
+          ls -l target-${{ matrix.build }}/release target-${{ matrix.build }}/release/deps
           mkdir elf-info
           readelf -a -D -W target-${{ matrix.build }}/release/libhello_world.so > elf-info/dylib-${{ matrix.build }}.txt
-          readelf -a -D -W target-${{ matrix.build }}/release/hello-world > elf-info/bin-${{ matrix.build }}.txt
+          readelf -a -D -W target-${{ matrix.build }}/release/hello-world > elf-info/bin-${{ matrix.build }}.txt ||:
 
       - uses: actions/upload-artifact@v2
         with:
