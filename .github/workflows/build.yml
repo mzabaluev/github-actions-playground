@@ -1,5 +1,7 @@
 on: push
 
+name: Test reproducibility of Rust dylib builds
+
 jobs:
   update-registry:
     runs-on: ubuntu-20.04
@@ -69,4 +71,5 @@ jobs:
 
       - uses: actions/upload-artifact@v2
         with:
+          name: elf-info
           path: elf-info
