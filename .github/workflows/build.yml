@@ -34,6 +34,12 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Install latest stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
       - name: Restore cargo registry
         uses: actions/cache@v2
         with:
