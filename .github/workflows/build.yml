@@ -31,8 +31,9 @@ jobs:
     needs: update-registry
     strategy:
       matrix:
+        os: [ubuntu-20.04, macos-latest, windows-latest]
         build: [a, b]
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v2
 
@@ -47,6 +48,7 @@ jobs:
         with:
           path: ~/.cargo/registry/index
           key: cargo-index-${{ needs.update-registry.outputs.head }}
+          restore-keys: cargo-index-
 
       - name: Build the binaries
         uses: actions-rs/cargo@v1
@@ -60,16 +62,19 @@ jobs:
             --verbose --release
             --lib --bin hello-world
 
-      - name: Print readelf version
-        run: readelf --version
-
-      - name: Dump information from binaries
+      - name: Collect output binaries
+        shell: bash
         run: |
-          mkdir elf-info
-          readelf -a -D -W target-${{ matrix.build }}/release/libhello_world.so > elf-info/dylib-${{ matrix.build }}.txt
-          readelf -a -D -W target-${{ matrix.build }}/release/hello-world > elf-info/bin-${{ matrix.build }}.txt ||:
+          case '${{ matrix.os }}' in
+            ubuntu-*  ) dylib_name=libhello_world.so;;
+            macos-*   ) dylib_name=libhello_world.dylib;;
+            windows-* ) dylib_name=hello_world.dll;;
+          esac
+          artifact_dir=output/${{ matrix.os }}-${{ matrix.build }}
+          mkdir -p $artifact_dir
+          cp target-${{ matrix.build }}/release/{${dylib_name},hello-world} $artifact_dir
 
       - uses: actions/upload-artifact@v2
         with:
-          name: elf-info
-          path: elf-info
+          name: binaries
+          path: output
