@@ -40,19 +40,21 @@ jobs:
           path: ~/.cargo/registry/index
           key: cargo-index-${{ needs.update-registry.outputs.head }}
 
-      - name: Build the dynamic library
+      - name: Build the binaries
         uses: actions-rs/cargo@v1
         env:
           RUSTFLAGS: -C prefer-dynamic=yes
           CARGO_INCREMENTAL: 0
         with:
           command: build
-          args: --verbose --release --lib
+          args: --verbose --release --lib --bin hello-world
 
-      - name: Dump shared library information
-        run: readelf -a -D -W target/release/libhello_world.so > dylib-info.txt
+      - name: Dump information from binaries
+        run: |
+          mkdir elf-info
+          readelf -a -D -W target/release/libhello_world.so > elf-info/dylib-${{ matrix.build }}.txt
+          readelf -a -D -W target/release/hello-world > elf-info/bin-${{ matrix.build }}.txt
 
       - uses: actions/upload-artifact@v2
         with:
-          name: build-${{ matrix.build }}
-          path: dylib-info.txt
+          path: elf-info
