@@ -53,13 +53,16 @@ jobs:
           CARGO_INCREMENTAL: 0
         with:
           command: build
-          args: --verbose --release --lib --bin hello-world
+          args: >
+            --target-dir target-${{ matrix.build }}
+            --verbose --release
+            --lib --bin hello-world
 
       - name: Dump information from binaries
         run: |
           mkdir elf-info
-          readelf -a -D -W target/release/libhello_world.so > elf-info/dylib-${{ matrix.build }}.txt
-          readelf -a -D -W target/release/hello-world > elf-info/bin-${{ matrix.build }}.txt
+          readelf -a -D -W target-${{ matrix.build }}/release/libhello_world.so > elf-info/dylib-${{ matrix.build }}.txt
+          readelf -a -D -W target-${{ matrix.build }}/release/hello-world > elf-info/bin-${{ matrix.build }}.txt
 
       - uses: actions/upload-artifact@v2
         with:
