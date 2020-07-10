@@ -25,3 +25,10 @@ jobs:
     steps:
       - name: List Cargo registry cache files
         run: ls -lR ~/.cargo/registry
+
+  list-on-mac:
+    runs-on: macos-latest
+    continue-on-error: true
+    steps:
+      - name: List Cargo registry cache files
+        run: ls -lR ~/.cargo/registry
