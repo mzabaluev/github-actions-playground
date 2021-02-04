@@ -2,24 +2,32 @@ on: push
 
 jobs:
   test:
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - name: Print tar info, pristine environment
+        run: |
+          which tar
+          tar --version
 
-      - name: Build
-        uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: |
-            --release
-            --locked
-            --verbose
+      - if: ${{ runner.os == 'macOS' }}
+        name: Augment PATH with install location of GNU tar binary
+        run: |
+          echo PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
+
+      - if: ${{ runner.os == 'macOS' }}
+        name: Print tar info, PATH modified for GNU tar
+        run: |
+          which tar
+          tar --version
 
       - name: Archive
         run: |
-          /usr/local/opt/gnu-tar/libexec/gnubin/tar -C ./target/release -czvf archive.tar.gz github-actions-playground
+          tar -C /bin -czvf archive.tar.gz bash
 
       - uses: actions/upload-artifact@v2
         with:
-          name: tarball
+          name: tarball-${{ matrix.os }}
           path: archive.tar.gz
