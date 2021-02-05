@@ -2,32 +2,32 @@ on: push
 
 jobs:
   test:
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    runs-on: macos-latest
     steps:
-      - name: Print tar info, pristine environment
+      - name: Print tar info
         run: |
           which tar
           tar --version
 
-      - if: ${{ runner.os == 'macOS' }}
-        name: Augment PATH with install location of GNU tar binary
+      - name: Copy and checksum binary
         run: |
-          echo PATH="/usr/local/opt/gnu-tar/libexec/gnubin:$PATH" >> $GITHUB_ENV
-
-      - if: ${{ runner.os == 'macOS' }}
-        name: Print tar info, PATH modified for GNU tar
-        run: |
-          which tar
-          tar --version
+          mkdir target
+          cp -p /bin/bash target/
+          shasum target/bash > checksum
 
       - name: Archive
         run: |
-          tar -C /bin -czvf archive.tar.gz bash
+          tar -C target -czvf archive.tar.gz bash
+          rm -rf target
 
       - uses: actions/upload-artifact@v2
         with:
-          name: tarball-${{ matrix.os }}
           path: archive.tar.gz
+
+      - name: Extract binary from the archive
+        run: |
+          mkdir target
+          tar -C target -xzvf archive.tar.gz
+
+      - name: Verify the checksum
+        run: shasum -c checksum
