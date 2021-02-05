@@ -9,22 +9,18 @@ jobs:
           which tar
           tar --version
 
-      - name: Copy and checksum binary
+      - name: Copy and checksum binaries
         run: |
           mkdir target
-          cp -p /bin/bash target/
-          shasum target/bash > checksum
+          cp -p /Library/Developer/CommandLineTools/usr/bin/{clang,ld} target/
+          shasum target/* > checksum
 
       - name: Archive
         run: |
-          tar -C target -czvf archive.tar.gz bash
+          tar -C target -czvf archive.tar.gz clang ld
           rm -rf target
 
-      - uses: actions/upload-artifact@v2
-        with:
-          path: archive.tar.gz
-
-      - name: Extract binary from the archive
+      - name: Extract binaries from the archive
         run: |
           mkdir target
           tar -C target -xzvf archive.tar.gz
