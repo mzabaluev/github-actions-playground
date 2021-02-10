@@ -18,21 +18,20 @@ jobs:
         with:
           command: build
           args: |
-            --release
             --verbose
 
       - name: Checksum the binary
         run: |
-          shasum target/release/github-actions-playground > ${{ runner.temp }}/checksum
+          shasum target/debug/github-actions-playground > ${{ runner.temp }}/checksum
 
       - name: Archive
         run: |
-          tar -C target/release -czvf ${{ runner.temp }}/archive.tar.gz github-actions-playground
+          tar -C target/debug -czvf ${{ runner.temp }}/archive.tar.gz github-actions-playground
 
       - name: Extract the archive
         run: |
-          rm -r target/release/*
-          tar -C target/release -xzvf ${{ runner.temp }}/archive.tar.gz
+          rm -r target/debug/*
+          tar -C target/debug -xzvf ${{ runner.temp }}/archive.tar.gz
 
       - name: Verify the checksum
         run: shasum -c ${{ runner.temp }}/checksum
