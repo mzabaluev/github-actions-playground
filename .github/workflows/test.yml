@@ -4,6 +4,8 @@ jobs:
   test:
     runs-on: macos-latest
     steps:
+      - run: diskutil info -all
+
       - uses: actions/checkout@v2
 
       - name: Install the stable Rust toolchain
