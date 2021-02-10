@@ -4,26 +4,35 @@ jobs:
   test:
     runs-on: macos-latest
     steps:
-      - name: Print tar info
-        run: |
-          which tar
-          tar --version
+      - uses: actions/checkout@v2
 
-      - name: Copy and checksum binaries
+      - name: Install the stable Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          default: true
+
+      - name: Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: |
+            --release
+            --verbose
+
+      - name: Checksum the binary
         run: |
-          mkdir target
-          cp -p /Library/Developer/CommandLineTools/usr/bin/{clang,ld} target/
-          shasum target/* > checksum
+          shasum target/release/github-actions-playground > ${{ runner.temp }}/checksum
 
       - name: Archive
         run: |
-          tar -C target -czvf archive.tar.gz clang ld
-          rm -rf target
+          tar -C target/release -czvf ${{ runner.temp }}/archive.tar.gz github-actions-playground
 
-      - name: Extract binaries from the archive
+      - name: Extract the archive
         run: |
-          mkdir target
-          tar -C target -xzvf archive.tar.gz
+          rm -r target/release/*
+          tar -C target/release -xzvf ${{ runner.temp }}/archive.tar.gz
 
       - name: Verify the checksum
-        run: shasum -c checksum
+        run: shasum -c ${{ runner.temp }}/checksum
