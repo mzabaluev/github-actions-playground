@@ -78,10 +78,10 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --all-targets --locked --frozen --verbose
+          args: --all-targets --locked --verbose
 
       - name: Test
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --locked --frozen
+          args: --locked
